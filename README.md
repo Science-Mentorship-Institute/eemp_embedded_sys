@@ -118,6 +118,8 @@ Link: https://wokwi.com/projects/433793637802253313
 # Sample 3: Controlling a servo 
 Controls a Servo
 
+main.py
+
 
 # Exercise 1: Making a simple robot
 Exercise 1 integrates all the samples to make an entire robot. 
