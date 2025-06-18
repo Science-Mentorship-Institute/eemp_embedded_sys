@@ -2,6 +2,8 @@
 Welcome to the embedded system lab. 
 
 # Pre Requisites
+- Read/watched the Embedded System Lecture
+- Read/watched the Digital Design Lecture/Lab
 - Read the prelab about MicroPython
 - Do the prelab
 
@@ -14,7 +16,10 @@ Welcome to the embedded system lab.
     - After selecting the microcontroller, select "Micropython" Beginner Templates.
     -  You should now see a development environment with files like main.py and diagram.json. You should also see a simulation environment with the ESP32-C3-MINI-1. 
         - If you can't, you may be zoomed out or zoomed in too much. 
-    - Next, Try out Sample 0: Blinking LED 
+    - Next, Try out Sample 1: Blinking LED 
+
+# Background 
+- In this lab, you will go over how electronics are developed at the software layer using a simulation software called Wokwi. 
 
 ### Micropython
 Micropython is a programming language specifically designed for microcontrollers that often have very little memory to store programs. Micropython is based on python 3 so most of the syntax follows python 3. The difference between Micropython and Python 3 is that micropython is specifically designed for microcontrollers so there are **less** general purpose libraries for micropython. 
@@ -30,13 +35,9 @@ Here are some reference documentation for Micropython:
 ## Low level Programming
 - High Level API Calls
 - Register Access
-- 
 
 ## Hardware 
-Since we are doing all this in simulation, the hardware aspect of this is software defined. This means that the components exists as description that the simulation software reads to understand. 
-
-# Background 
-- In this lab, you will go over how electronics are developed at the software layer using a simulation software called Wokwi. 
+Since we are doing all this in simulation, the hardware aspect is software defined. This means that the components exists as description that the simulation software reads to understand. In the real world, you do need to understand the hardware aspect of the system. 
 
 ## Wokwi: Interface 
 - Play Button
@@ -53,9 +54,13 @@ Micropython also gives you an interactive REPL so you can run python commands in
 In this example, we will show the same LED blinking as Sample 1 along with usage of an OLED screen to show the I2C Protocol using the Logic Analyzer/REPL. 
 
 Board: ESP32-C3
-Link: https://wokwi.com/projects/433858272977254401
+</br>Link: https://wokwi.com/projects/433858272977254401
 
-main.py 
+## main.py 
+
+<details>
+<summary>main.py code</summary>
+
 ```
 from machine import Pin, I2C
 import ssd1306
@@ -74,8 +79,13 @@ oled = ssd1306.SSD1306_I2C(oled_width, oled_height, i2c)
 oled.text('Hello, Wokwi!', 10, 10)      
 oled.show()
 ```
+</details>
 
-diagram.json
+## diagram.json
+
+<details>
+<summary>diagram.json code</summary>
+
 ```
 {
   "version": 1,
@@ -137,8 +147,13 @@ diagram.json
   "dependencies": {}
 }
 ```
+</details>
 
-ssd1306.py
+## ssd1306.py
+
+<details>
+<summary>ssd1306.py code</summary>
+
 ```
 #MicroPython SSD1306 OLED driver, I2C and SPI interfaces created by Adafruit
 
@@ -308,6 +323,7 @@ class SSD1306_SPI(SSD1306):
         time.sleep_ms(10)
         self.res.high()
 ```
+</details>
 
 
 
@@ -317,7 +333,11 @@ Blinks a LED.
 Board: ESP32-C3
 Link: https://wokwi.com/projects/433782979021457409
 
-main.py
+## main.py
+
+<details>
+<summary>main.py code</summary>
+
 ```
 1 from machine import Pin
 2 from utime import sleep
@@ -347,7 +367,13 @@ main.py
 <br>Line 12, 15: Print statements that shows various ways to show variables along with a string. 
 <br> Line 13: led.off() turns the pin to be low. So the voltage at that pin is LOW.  
 
-diagram.json
+</details>
+
+## diagram.json
+
+<details>
+<summary>diagram.json code</summary>
+
 ```
 {
   "version": 1,
@@ -372,16 +398,21 @@ diagram.json
   "dependencies": {}
 }
 ```
-Simulation: 
-![Micropython Blinking LED Example](/assets/image/sample1_blinkingled_simulation.png)
+</details>
+</br>
+
+![Micropython Blinking LED Example](assets/image/sample1_blinkingled_simulation.png)
 
 # Sample 2: Acceleration Sensor Reading
 Reads acceleration readings
 
 Board: ESP32-DevKit-C-V4
-Link: https://wokwi.com/projects/433793637802253313
+</br>Link: https://wokwi.com/projects/433793637802253313
 
-main.py
+<details>
+<summary>main.py code</summary>
+
+## main.py
 ```
 # Author: andoug / Original Project Link: https://wokwi.com/projects/384474225375726593
 from machine import Pin, I2C
@@ -431,8 +462,12 @@ while True:
     time.sleep(0.1)
 
 ```
+</details>
 
-diagram.json
+## diagram.json
+<details>
+<summary>diagram.json code</summary>
+
 ```
 {
   "version": 1,
@@ -465,7 +500,13 @@ diagram.json
 }
 ```
 
-ssd1306.py
+</details>
+
+## ssd1306.py
+
+<details>
+<summary>ssd1306.py code</summary>
+
 ```
 #MicroPython SSD1306 OLED driver, I2C and SPI interfaces created by Adafruit
 
@@ -636,7 +677,12 @@ class SSD1306_SPI(SSD1306):
         self.res.high()
 ```
 
-mpu6050.py
+</details>
+
+## mpu6050.py
+<details>
+<summary>mpu6050.py code</summary>
+
 ```
 """
 A lightweight MicroPython implementation for interfacing with an MPU-6050 via I2C. 
@@ -796,14 +842,19 @@ class MPU6050:
         else:
             raise Exception("Range index '" + index + "' invalid. Must be 0-3.")
 ```
+</details>
 
 # Sample 3: Controlling a FAN
 Controls a FAN using a servo and a temperature sensor
 
 Board: ESP32-S3 
-Link: https://wokwi.com/projects/433798826999639041
+</br>Link: https://wokwi.com/projects/433798826999639041
 
-main.py
+
+## main.py
+<details>
+<summary>main.py code</summary>
+
 ```
 from machine import Pin, PWM, ADC
 import utime, math
@@ -811,6 +862,7 @@ import onewire, ds18x20
 from time import sleep
 
 # Temperature Sensor ADC Setup
+
 BETA = 3950
 adc = ADC(Pin(19))
 adc.atten(ADC.ATTN_11DB)
@@ -846,8 +898,12 @@ while True:
     Servo(pwm, 0)
     sleep(1)
 ```
+</details>
 
-diagram.json
+## diagram.json
+<details>
+<summary>diagram.json code</summary>
+
 ```
 {
   "version": 1,
@@ -884,16 +940,29 @@ diagram.json
   "dependencies": {}
 }
 ```
+</details>
 
 # Exercise 1: Making a simple robot
-Exercise 1 integrates all the samples to make an entire robot. 
+Exercise 1 integrates all the samples to make an entire robot system. 
+
+Board: ESP32-S3 
+</br>Link: 
 
 # Exercise 2: Make your own Embedded System
 Exercise 1 should take all the separate components that you previously built in Sample 1-4 and expand it more to use multiple sensors and multiple actuators. 
-This exercise is more opened ended. 
+This exercise is more opened ended.
+
+Board: ESP32-S3 
+</br>Link: Make your own project. You will submit a link to this later. 
 
 Choose an embedded system that you want to do. 
-Examples:
+</br>Examples:
 - Robotics
+- Biology Monitoring Device
+- Medical Device using Sensors and Display
 
 
+# Other (Optional):
+
+## Protocols
+See [Protocols](Protocols.md)
