@@ -113,6 +113,7 @@ while True:
     print(f"After OFF: GPIO_OUT = {bin(mem32[GPIO_OUT_REG])}")
     time.sleep(0.5)
 ```
+Link: https://wokwi.com/projects/438145871326704641
 
 You may ask, where does these magic numbers come from? See Link: [ESP32 Technical Manual](https://www.mouser.com/pdfdocs/ESP32-Tech_Reference.pdf?srsltid=AfmBOopwrhod4EnESqcg54uDPF-MAuQZXA1Mrt7IrSkeaRs3pkWa2d7T&utm_source=chatgpt.com)
 
