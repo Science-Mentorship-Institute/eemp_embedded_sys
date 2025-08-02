@@ -1029,23 +1029,26 @@ while True:
 </details>
 
 # Exercise 1: Making a simple robot
-Exercise 1 integrates all the samples to make an entire robot system. 
+Exercise 1 integrates all the samples to make an entire robot system. Exercise 1 should take all the separate components that you previously built in Sample 0-3 and expand it more to use multiple sensors and multiple actuators. 
 
 Board: ESP32-S3 
 </br>Link: Answers to be released later.
 
 # Exercise 2: Make your own Embedded System
-Exercise 1 should take all the separate components that you previously built in Sample 1-4 and expand it more to use multiple sensors and multiple actuators. 
 This exercise is more opened ended.
-
-Board: ESP32-S3 
-</br>Link: Make your own project. There may be a presentation at the end of the lab. 
 
 Choose an embedded system that you want to do. 
 </br>Examples:
 - Robotics
+- Visual Displays
+- Internet of Thing Devices (Energy Monitor)
+- Controller Devices (Smart Switch)
+- Remote Controlled Vehicle
 - Biology Monitoring Device
 - Medical Device using Sensors and Display
+
+Board: ESP32-S3 
+</br>Link: Make your own project. There may be a presentation at the end of the lab. 
 
 
 # Other (Optional):
