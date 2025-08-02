@@ -40,7 +40,7 @@ Firmware and Low level programming is under a paradigm called "Systems Thinking"
 
 In systems engineering, your job really isn't to program and create individual components but to figure out how the different pieces of the puzzles fit in. When problems occur, you have to consider everything since everything is interconnected. Systems is interesting and very difficult because as systems grow, complexity balloons too a place where you actually have to develop different methodology to accomodate. Creating individual components is actually fairly easy in today's world infact, nowadays you don't really need to create new code since many code is reusable but when you create a system, you have to consider everything like safety and security. 
 
-It is important to balance both the "fine" details and the larger picture of how individual components fit into a larger system. There are downsides to priortizing the "fine" details since you can lose the larger picture. But there are also downsides to thinking about the larger picture since the "attention" to detail is lost. 
+It is important to balance both the "fine" details and the larger picture of how individual components fit into a larger system. There are downsides to prioritizing the "fine" details since you can lose the larger picture. But there are also downsides to thinking about the larger picture since the "attention" to detail is lost. 
 
 For the upcoming information, try to look through the lens of "Systems Thinking"
 
