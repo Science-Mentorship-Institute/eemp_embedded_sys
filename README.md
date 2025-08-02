@@ -32,9 +32,94 @@ Here are some reference documentation for Micropython:
 - https://docs.micropython.org/en/latest/
 
 
-## Low level Programming
-- High Level API Calls
-- Register Access
+## Firmware Engineering Background Information
+
+## Systems Thinking
+
+Firmware and Low level programming is under a paradigm called "Systems Thinking" where you balance  understanding how different components within a complicated system connects to each other and granular details. Most of the biggest technology companies are "systems" companies, their big moat is because they sell full-systems instead of individual components. Think about cloud services, you can purchase through an abstracted interface and access endless compute power. Underneath the hood, cloud services is insanely complicated with many complicated parts, separated between hardware and software. 
+
+In systems engineering, your job really isn't to program and create individual components but to figure out how the different pieces of the puzzles fit in. When problems occur, you have to consider everything since everything is interconnected. Systems is interesting and very difficult because as systems grow, complexity balloons too a place where you actually have to develop different methodology to accomodate. Creating individual components is actually fairly easy in today's world infact, nowadays you don't really need to create new code since many code is reusable but when you create a system, you have to consider everything like safety and security. 
+
+It is important to balance both the "fine" details and the larger picture of how individual components fit into a larger system. There are downsides to priortizing the "fine" details since you can lose the larger picture. But there are also downsides to thinking about the larger picture since the "attention" to detail is lost. 
+
+For the upcoming information, try to look through the lens of "Systems Thinking"
+
+## Electronics and Firmware
+Electronics are created through a mix of analog and digital circuit components. Firmware directly accesses mainly the digital circuit components through an interface. Often, this interface is through a microcontroller. Microcontrollers consist of registers that allow programs to directly access to control the behavior of the underlying circuit.
+
+### Abstraction: Application Programming Interface (API)
+An application programming interface (API) is a abstraction layer that programmers create to keep granular details a secret to keep complexity in check. Simply put, API's are libraries of code that has already been created to be reused. API's methods are either accessors or mutators. Accessors will read out information whereas mutators will modify objects. 
+
+### High Level API Calls
+
+High Level API is an abstraction layer that ultimately calls lower level programming API. 
+
+In micropython, a simple example is blinking an LED. See: https://wokwi.com/projects/359801682833812481
+
+```
+from machine import Pin
+from utime import sleep
+
+led = Pin(15, Pin.OUT) # Instantiating the LED object 
+while True:
+  led.on()
+  sleep(0.5)
+  led.off()
+  sleep(0.5)
+```
+
+By importing "machine", you get access to the "Pin" object. Underneath the hood, you are creating an object that has the declared pins ready to go for a specific microcontroller and then calling functions that have been already created to get the led to blink. Lower level details are abstracted away so you need to look at documentation to figure out how to use the "Pin" object. For more information, see: https://docs.micropython.org/en/latest/pyboard/tutorial/leds.html
+
+### Low Level API Calls
+
+Low level programming directly works with hardware using mechanisms like register level access and communication protocols. Low level APIs is the granular details that higher level APIs abstract away. Low level programming ties alot to digital design lectures because ultimately many of the details that you need to understand low level programming comes from the digital design space. 
+
+Also in micropython, this is the same algorithm to blink an LED but with more granular details using register level access.
+```
+# Example 1: Lower Level API Access
+from machine import mem32
+import time
+
+# ESP32 GPIO Register Base Address
+GPIO_BASE_ADDR = 0x3FF44000
+
+# Offsets from base
+GPIO_OUT_OFFSET        = 0x04  # Read output level
+GPIO_OUT_W1TS_OFFSET   = 0x08  # Set output (1 = HIGH)
+GPIO_OUT_W1TC_OFFSET   = 0x0C  # Clear output (1 = LOW)
+GPIO_ENABLE_OFFSET     = 0x20  # Output enable
+
+# Functionality register address
+GPIO_OUT_REG      = GPIO_BASE_ADDR + GPIO_OUT_OFFSET
+GPIO_OUT_W1TS_REG = GPIO_BASE_ADDR + GPIO_OUT_W1TS_OFFSET
+GPIO_OUT_W1TC_REG = GPIO_BASE_ADDR + GPIO_OUT_W1TC_OFFSET
+GPIO_ENABLE_REG   = GPIO_BASE_ADDR + GPIO_ENABLE_OFFSET
+
+# Choose the GPIO pin
+GPIO_NUM = 15
+PIN_MASK = 1 << GPIO_NUM #0b1 << GPIO_NUM = 0b1000...00 , numbers of zeros depende on the GPIO Num
+
+# Set GPIO2 as output
+mem32[GPIO_ENABLE_REG] |= PIN_MASK
+
+# Blink loop
+while True:
+    print(f"Before ON: GPIO_OUT = {bin(mem32[GPIO_OUT_REG])}")
+    mem32[GPIO_OUT_W1TS_REG] = PIN_MASK  # LED ON
+    print(f"After ON:  GPIO_OUT = {bin(mem32[GPIO_OUT_REG])}")
+    time.sleep(0.5)
+    print(f"Before OFF: GPIO_OUT = {bin(mem32[GPIO_OUT_REG])}")
+    mem32[GPIO_OUT_W1TC_REG] = PIN_MASK  # LED OFF
+    print(f"After OFF: GPIO_OUT = {bin(mem32[GPIO_OUT_REG])}")
+    time.sleep(0.5)
+```
+
+You may ask, where does these magic numbers come from? See Link: [ESP32 Technical Manual](https://www.mouser.com/pdfdocs/ESP32-Tech_Reference.pdf?srsltid=AfmBOopwrhod4EnESqcg54uDPF-MAuQZXA1Mrt7IrSkeaRs3pkWa2d7T&utm_source=chatgpt.com)
+
+- On Page 59. Under 4.12 Register Summary
+
+
+
 
 ## Hardware 
 Since we are doing all this in simulation, the hardware aspect is software defined. This means that the components exists as description that the simulation software reads to understand. In the real world, you do need to understand the hardware aspect of the system. 
@@ -907,7 +992,7 @@ while True:
 ```
 {
   "version": 1,
-  "author": "Jesse Cheung",
+  "author": "Sci-Mi",
   "editor": "wokwi",
   "parts": [
     {
@@ -946,7 +1031,7 @@ while True:
 Exercise 1 integrates all the samples to make an entire robot system. 
 
 Board: ESP32-S3 
-</br>Link: 
+</br>Link: Answers to be released later.
 
 # Exercise 2: Make your own Embedded System
 Exercise 1 should take all the separate components that you previously built in Sample 1-4 and expand it more to use multiple sensors and multiple actuators. 
@@ -963,6 +1048,3 @@ Choose an embedded system that you want to do.
 
 
 # Other (Optional):
-
-## Protocols
-See [Protocols](Protocols.md)
