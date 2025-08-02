@@ -1039,7 +1039,7 @@ Exercise 1 should take all the separate components that you previously built in 
 This exercise is more opened ended.
 
 Board: ESP32-S3 
-</br>Link: Make your own project. You will submit a link to this later. 
+</br>Link: Make your own project. There may be a presentation at the end of the lab. 
 
 Choose an embedded system that you want to do. 
 </br>Examples:
