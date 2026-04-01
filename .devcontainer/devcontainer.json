@@ -1,0 +1,11 @@
+{
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "wokwi.wokwi-vscode",
+        "platformio.platformio-ide"
+      ]
+    }
+  },
+  "postCreateCommand": "curl -L https://wokwi.com/ci/install.sh | sh"
+}
