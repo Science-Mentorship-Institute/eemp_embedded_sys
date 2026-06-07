@@ -1,0 +1,164 @@
+name: "Lab2 - Cyclone Arcade Game (single-boot: GPIO sweep + game logic)"
+version: 1
+author:
+
+steps:
+  # ===== Boot -> IDLE: only the centre target LED (GPIO3) is lit =====
+  - wait-serial: "IDLE"
+  - delay: 100ms
+  - expect-pin: { part-id: esp, pin: "7", value: 1 }   # button idle: INPUT_PULLUP -> HIGH
+  - expect-pin: { part-id: esp, pin: "0", value: 0 }
+  - expect-pin: { part-id: esp, pin: "1", value: 0 }
+  - expect-pin: { part-id: esp, pin: "2", value: 0 }
+  - expect-pin: { part-id: esp, pin: "3", value: 1 }   # centre
+  - expect-pin: { part-id: esp, pin: "4", value: 0 }
+  - expect-pin: { part-id: esp, pin: "5", value: 0 }
+  - expect-pin: { part-id: esp, pin: "6", value: 0 }
+
+  # ===== Start the game; verify the press is seen on the button GPIO =====
+  # (Keep the hold short -- the movement clock starts at press-DOWN, so a long hold
+  #  shrinks index 0's window and the settle below could overshoot into index 1.)
+  - set-control: { part-id: btn, control: pressed, value: 1 }
+  - delay: 20ms
+  - expect-pin: { part-id: esp, pin: "7", value: 0 }   # button pulls esp:7 LOW
+  - delay: 20ms                                        # hold ~40ms total
+  - set-control: { part-id: btn, control: pressed, value: 0 }
+
+  # ===== Rightward sweep: exactly one GPIO HIGH per step, index 0..6 =====
+
+  # ---- index 0 (also confirm the button released back to HIGH) ----
+  - wait-serial: "POS: 0"
+  - delay: 30ms
+  - expect-pin: { part-id: esp, pin: "7", value: 1 }
+  - expect-pin: { part-id: esp, pin: "0", value: 1 }
+  - expect-pin: { part-id: esp, pin: "1", value: 0 }
+  - expect-pin: { part-id: esp, pin: "2", value: 0 }
+  - expect-pin: { part-id: esp, pin: "3", value: 0 }
+  - expect-pin: { part-id: esp, pin: "4", value: 0 }
+  - expect-pin: { part-id: esp, pin: "5", value: 0 }
+  - expect-pin: { part-id: esp, pin: "6", value: 0 }
+
+  # ---- index 1 ----
+  - wait-serial: "POS: 1"
+  - delay: 30ms
+  - expect-pin: { part-id: esp, pin: "0", value: 0 }
+  - expect-pin: { part-id: esp, pin: "1", value: 1 }
+  - expect-pin: { part-id: esp, pin: "2", value: 0 }
+  - expect-pin: { part-id: esp, pin: "3", value: 0 }
+  - expect-pin: { part-id: esp, pin: "4", value: 0 }
+  - expect-pin: { part-id: esp, pin: "5", value: 0 }
+  - expect-pin: { part-id: esp, pin: "6", value: 0 }
+
+  # ---- index 2 ----
+  - wait-serial: "POS: 2"
+  - delay: 30ms
+  - expect-pin: { part-id: esp, pin: "0", value: 0 }
+  - expect-pin: { part-id: esp, pin: "1", value: 0 }
+  - expect-pin: { part-id: esp, pin: "2", value: 1 }
+  - expect-pin: { part-id: esp, pin: "3", value: 0 }
+  - expect-pin: { part-id: esp, pin: "4", value: 0 }
+  - expect-pin: { part-id: esp, pin: "5", value: 0 }
+  - expect-pin: { part-id: esp, pin: "6", value: 0 }
+
+  # ---- index 3 (the centre target) ----
+  - wait-serial: "POS: 3"
+  - delay: 30ms
+  - expect-pin: { part-id: esp, pin: "0", value: 0 }
+  - expect-pin: { part-id: esp, pin: "1", value: 0 }
+  - expect-pin: { part-id: esp, pin: "2", value: 0 }
+  - expect-pin: { part-id: esp, pin: "3", value: 1 }
+  - expect-pin: { part-id: esp, pin: "4", value: 0 }
+  - expect-pin: { part-id: esp, pin: "5", value: 0 }
+  - expect-pin: { part-id: esp, pin: "6", value: 0 }
+
+  # ---- index 4 ----
+  - wait-serial: "POS: 4"
+  - delay: 30ms
+  - expect-pin: { part-id: esp, pin: "0", value: 0 }
+  - expect-pin: { part-id: esp, pin: "1", value: 0 }
+  - expect-pin: { part-id: esp, pin: "2", value: 0 }
+  - expect-pin: { part-id: esp, pin: "3", value: 0 }
+  - expect-pin: { part-id: esp, pin: "4", value: 1 }
+  - expect-pin: { part-id: esp, pin: "5", value: 0 }
+  - expect-pin: { part-id: esp, pin: "6", value: 0 }
+
+  # ---- index 5 ----
+  - wait-serial: "POS: 5"
+  - delay: 30ms
+  - expect-pin: { part-id: esp, pin: "0", value: 0 }
+  - expect-pin: { part-id: esp, pin: "1", value: 0 }
+  - expect-pin: { part-id: esp, pin: "2", value: 0 }
+  - expect-pin: { part-id: esp, pin: "3", value: 0 }
+  - expect-pin: { part-id: esp, pin: "4", value: 0 }
+  - expect-pin: { part-id: esp, pin: "5", value: 1 }
+  - expect-pin: { part-id: esp, pin: "6", value: 0 }
+
+  # ---- index 6 (right edge -- firmware now bounces back leftward) ----
+  - wait-serial: "POS: 6"
+  - delay: 30ms
+  - expect-pin: { part-id: esp, pin: "0", value: 0 }
+  - expect-pin: { part-id: esp, pin: "1", value: 0 }
+  - expect-pin: { part-id: esp, pin: "2", value: 0 }
+  - expect-pin: { part-id: esp, pin: "3", value: 0 }
+  - expect-pin: { part-id: esp, pin: "4", value: 0 }
+  - expect-pin: { part-id: esp, pin: "5", value: 0 }
+  - expect-pin: { part-id: esp, pin: "6", value: 1 }
+
+  # ===== WIN: let the light bounce back to the centre, then stop it there =====
+  # After index 6 the light reverses (ST_MOVE_L). We consume the leftward POS: 5
+  # and POS: 4 lines, then stop on the leftward POS: 3 (= TARGET_INDEX) -> WIN.
+  # (These wait-serial steps have no timing constraint; they just advance us to the
+  #  centre. This also exercises the leftward sweep direction.)
+  - wait-serial: "POS: 5"
+  - wait-serial: "POS: 4"
+  - wait-serial: "POS: 3"
+  - delay: 30ms
+  - expect-pin: { part-id: esp, pin: "3", value: 1 }   # centre lit at the moment we stop
+  - set-control: { part-id: btn, control: pressed, value: 1 }
+  - delay: 40ms
+  - set-control: { part-id: btn, control: pressed, value: 0 }
+  - wait-serial: "WIN"
+  # Confirm the win blink: WIN_BLINK_DELAY_MS=180, first all-ON phase is [+180,+360)
+  # after entering WIN; sample mid-phase. (Fixed delay is measured from the serial
+  # sync above, so it is not affected by boot jitter.)
+  - delay: 270ms
+  - expect-pin: { part-id: esp, pin: "0", value: 1 }
+  - expect-pin: { part-id: esp, pin: "1", value: 1 }
+  - expect-pin: { part-id: esp, pin: "2", value: 1 }
+  - expect-pin: { part-id: esp, pin: "3", value: 1 }
+  - expect-pin: { part-id: esp, pin: "4", value: 1 }
+  - expect-pin: { part-id: esp, pin: "5", value: 1 }
+  - expect-pin: { part-id: esp, pin: "6", value: 1 }
+
+  # ===== Reset from WIN -> IDLE =====
+  - set-control: { part-id: btn, control: pressed, value: 1 }
+  - delay: 40ms
+  - set-control: { part-id: btn, control: pressed, value: 0 }
+  - wait-serial: "IDLE"
+  - delay: 30ms
+  - expect-pin: { part-id: esp, pin: "3", value: 1 }   # centre back on
+  - expect-pin: { part-id: esp, pin: "0", value: 0 }
+
+  # ===== LOSE: start again, stop OFF-centre (index 2) -> LED holds in place =====
+  - delay: 250ms                                       # clear debounce (DEBOUNCE_MS=180)
+  - set-control: { part-id: btn, control: pressed, value: 1 }
+  - delay: 40ms
+  - set-control: { part-id: btn, control: pressed, value: 0 }
+  - wait-serial: "POS: 2"
+  - set-control: { part-id: btn, control: pressed, value: 1 }
+  - delay: 40ms
+  - set-control: { part-id: btn, control: pressed, value: 0 }
+  - wait-serial: "LOSE"
+  - delay: 30ms
+  - expect-pin: { part-id: esp, pin: "2", value: 1 }   # held on the lost position
+  - expect-pin: { part-id: esp, pin: "3", value: 0 }   # definitely not the centre
+
+  # ===== Reset from LOSE -> IDLE =====
+  - delay: 250ms                                       # clear debounce
+  - set-control: { part-id: btn, control: pressed, value: 1 }
+  - delay: 40ms
+  - set-control: { part-id: btn, control: pressed, value: 0 }
+  - wait-serial: "IDLE"
+  - delay: 30ms
+  - expect-pin: { part-id: esp, pin: "3", value: 1 }
+  - expect-pin: { part-id: esp, pin: "2", value: 0 }

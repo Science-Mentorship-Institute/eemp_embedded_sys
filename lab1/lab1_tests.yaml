@@ -1,0 +1,168 @@
+name: Lab1 - 7-Segment Button Counter Tests
+version: 1
+author:
+
+# These tests verify the wiring in diagram.json end to end:
+#
+#   1. Button connection  esp:9 -> btn1:1.l  (btn1:2.l -> GND):
+#      every counter increment below is driven by toggling btn1, so the counter
+#      only advances if that connection works.
+#
+#   2. Segment connections (the bulk of diagram.json):
+#         esp:2 -> sevseg1:A   esp:3 -> sevseg1:B   esp:4 -> sevseg1:C
+#         esp:5 -> sevseg1:D   esp:6 -> sevseg1:E   esp:7 -> sevseg1:F
+#         esp:8 -> sevseg1:G
+#      After each digit is reached we read the seven segment pins with expect-pin
+#      and compare them to digitPatterns[] in sketch.ino. The display is
+#      common-cathode, so a segment is lit when its pin is HIGH (1). Pin values are
+#      read as numbers, so they are written unquoted (value: 1 / value: 0).
+#      Across digits 0-9 every segment line is driven both HIGH and LOW, so a
+#      swapped, missing, or shorted segment wire fails at least one expect-pin step.
+#
+# Timing note: the firmware uses INPUT_PULLUP (released = HIGH, pressed = LOW) and
+# increments on the press/falling edge, with lastButtonState initialized to HIGH.
+# So the display starts at 0 with no phantom increment, and each press advances the
+# count by one. In each block below we press (value: 1 -> LOW, which triggers the
+# increment) and then release (value: 0 -> HIGH, which re-arms the edge detector)
+# before reading the now-stable digit.
+
+steps:
+  # ---- Boot: display starts at 0 (A B C D E F on, G off) ----
+  - wait-serial: "Current Value: 0"
+  - expect-pin: { part-id: sevseg1, pin: A, value: 1 }
+  - expect-pin: { part-id: sevseg1, pin: B, value: 1 }
+  - expect-pin: { part-id: sevseg1, pin: C, value: 1 }
+  - expect-pin: { part-id: sevseg1, pin: D, value: 1 }
+  - expect-pin: { part-id: sevseg1, pin: E, value: 1 }
+  - expect-pin: { part-id: sevseg1, pin: F, value: 1 }
+  - expect-pin: { part-id: sevseg1, pin: G, value: 0 }
+
+  # ---- Press 1: 0 -> 1 (B C on) ----
+  - set-control: { part-id: btn1, control: pressed, value: 1 }
+  - delay: 150ms
+  - set-control: { part-id: btn1, control: pressed, value: 0 }
+  - wait-serial: "Current Value: 1"
+  - expect-pin: { part-id: sevseg1, pin: A, value: 0 }
+  - expect-pin: { part-id: sevseg1, pin: B, value: 1 }
+  - expect-pin: { part-id: sevseg1, pin: C, value: 1 }
+  - expect-pin: { part-id: sevseg1, pin: D, value: 0 }
+  - expect-pin: { part-id: sevseg1, pin: E, value: 0 }
+  - expect-pin: { part-id: sevseg1, pin: F, value: 0 }
+  - expect-pin: { part-id: sevseg1, pin: G, value: 0 }
+
+  # ---- Press 2: 1 -> 2 (A B D E G on) ----
+  - set-control: { part-id: btn1, control: pressed, value: 1 }
+  - delay: 150ms
+  - set-control: { part-id: btn1, control: pressed, value: 0 }
+  - wait-serial: "Current Value: 2"
+  - expect-pin: { part-id: sevseg1, pin: A, value: 1 }
+  - expect-pin: { part-id: sevseg1, pin: B, value: 1 }
+  - expect-pin: { part-id: sevseg1, pin: C, value: 0 }
+  - expect-pin: { part-id: sevseg1, pin: D, value: 1 }
+  - expect-pin: { part-id: sevseg1, pin: E, value: 1 }
+  - expect-pin: { part-id: sevseg1, pin: F, value: 0 }
+  - expect-pin: { part-id: sevseg1, pin: G, value: 1 }
+
+  # ---- Press 3: 2 -> 3 (A B C D G on) ----
+  - set-control: { part-id: btn1, control: pressed, value: 1 }
+  - delay: 150ms
+  - set-control: { part-id: btn1, control: pressed, value: 0 }
+  - wait-serial: "Current Value: 3"
+  - expect-pin: { part-id: sevseg1, pin: A, value: 1 }
+  - expect-pin: { part-id: sevseg1, pin: B, value: 1 }
+  - expect-pin: { part-id: sevseg1, pin: C, value: 1 }
+  - expect-pin: { part-id: sevseg1, pin: D, value: 1 }
+  - expect-pin: { part-id: sevseg1, pin: E, value: 0 }
+  - expect-pin: { part-id: sevseg1, pin: F, value: 0 }
+  - expect-pin: { part-id: sevseg1, pin: G, value: 1 }
+
+  # ---- Press 4: 3 -> 4 (B C F G on) ----
+  - set-control: { part-id: btn1, control: pressed, value: 1 }
+  - delay: 150ms
+  - set-control: { part-id: btn1, control: pressed, value: 0 }
+  - wait-serial: "Current Value: 4"
+  - expect-pin: { part-id: sevseg1, pin: A, value: 0 }
+  - expect-pin: { part-id: sevseg1, pin: B, value: 1 }
+  - expect-pin: { part-id: sevseg1, pin: C, value: 1 }
+  - expect-pin: { part-id: sevseg1, pin: D, value: 0 }
+  - expect-pin: { part-id: sevseg1, pin: E, value: 0 }
+  - expect-pin: { part-id: sevseg1, pin: F, value: 1 }
+  - expect-pin: { part-id: sevseg1, pin: G, value: 1 }
+
+  # ---- Press 5: 4 -> 5 (A C D F G on) ----
+  - set-control: { part-id: btn1, control: pressed, value: 1 }
+  - delay: 150ms
+  - set-control: { part-id: btn1, control: pressed, value: 0 }
+  - wait-serial: "Current Value: 5"
+  - expect-pin: { part-id: sevseg1, pin: A, value: 1 }
+  - expect-pin: { part-id: sevseg1, pin: B, value: 0 }
+  - expect-pin: { part-id: sevseg1, pin: C, value: 1 }
+  - expect-pin: { part-id: sevseg1, pin: D, value: 1 }
+  - expect-pin: { part-id: sevseg1, pin: E, value: 0 }
+  - expect-pin: { part-id: sevseg1, pin: F, value: 1 }
+  - expect-pin: { part-id: sevseg1, pin: G, value: 1 }
+
+  # ---- Press 6: 5 -> 6 (A C D E F G on) ----
+  - set-control: { part-id: btn1, control: pressed, value: 1 }
+  - delay: 150ms
+  - set-control: { part-id: btn1, control: pressed, value: 0 }
+  - wait-serial: "Current Value: 6"
+  - expect-pin: { part-id: sevseg1, pin: A, value: 1 }
+  - expect-pin: { part-id: sevseg1, pin: B, value: 0 }
+  - expect-pin: { part-id: sevseg1, pin: C, value: 1 }
+  - expect-pin: { part-id: sevseg1, pin: D, value: 1 }
+  - expect-pin: { part-id: sevseg1, pin: E, value: 1 }
+  - expect-pin: { part-id: sevseg1, pin: F, value: 1 }
+  - expect-pin: { part-id: sevseg1, pin: G, value: 1 }
+
+  # ---- Press 7: 6 -> 7 (A B C on) ----
+  - set-control: { part-id: btn1, control: pressed, value: 1 }
+  - delay: 150ms
+  - set-control: { part-id: btn1, control: pressed, value: 0 }
+  - wait-serial: "Current Value: 7"
+  - expect-pin: { part-id: sevseg1, pin: A, value: 1 }
+  - expect-pin: { part-id: sevseg1, pin: B, value: 1 }
+  - expect-pin: { part-id: sevseg1, pin: C, value: 1 }
+  - expect-pin: { part-id: sevseg1, pin: D, value: 0 }
+  - expect-pin: { part-id: sevseg1, pin: E, value: 0 }
+  - expect-pin: { part-id: sevseg1, pin: F, value: 0 }
+  - expect-pin: { part-id: sevseg1, pin: G, value: 0 }
+
+  # ---- Press 8: 7 -> 8 (all segments on) ----
+  - set-control: { part-id: btn1, control: pressed, value: 1 }
+  - delay: 150ms
+  - set-control: { part-id: btn1, control: pressed, value: 0 }
+  - wait-serial: "Current Value: 8"
+  - expect-pin: { part-id: sevseg1, pin: A, value: 1 }
+  - expect-pin: { part-id: sevseg1, pin: B, value: 1 }
+  - expect-pin: { part-id: sevseg1, pin: C, value: 1 }
+  - expect-pin: { part-id: sevseg1, pin: D, value: 1 }
+  - expect-pin: { part-id: sevseg1, pin: E, value: 1 }
+  - expect-pin: { part-id: sevseg1, pin: F, value: 1 }
+  - expect-pin: { part-id: sevseg1, pin: G, value: 1 }
+
+  # ---- Press 9: 8 -> 9 (A B C D F G on) ----
+  - set-control: { part-id: btn1, control: pressed, value: 1 }
+  - delay: 150ms
+  - set-control: { part-id: btn1, control: pressed, value: 0 }
+  - wait-serial: "Current Value: 9"
+  - expect-pin: { part-id: sevseg1, pin: A, value: 1 }
+  - expect-pin: { part-id: sevseg1, pin: B, value: 1 }
+  - expect-pin: { part-id: sevseg1, pin: C, value: 1 }
+  - expect-pin: { part-id: sevseg1, pin: D, value: 1 }
+  - expect-pin: { part-id: sevseg1, pin: E, value: 0 }
+  - expect-pin: { part-id: sevseg1, pin: F, value: 1 }
+  - expect-pin: { part-id: sevseg1, pin: G, value: 1 }
+
+  # ---- Press 10 (wrap-around): 9 -> 0 (A B C D E F on, G off) ----
+  - set-control: { part-id: btn1, control: pressed, value: 1 }
+  - delay: 150ms
+  - set-control: { part-id: btn1, control: pressed, value: 0 }
+  - wait-serial: "Current Value: 0"
+  - expect-pin: { part-id: sevseg1, pin: A, value: 1 }
+  - expect-pin: { part-id: sevseg1, pin: B, value: 1 }
+  - expect-pin: { part-id: sevseg1, pin: C, value: 1 }
+  - expect-pin: { part-id: sevseg1, pin: D, value: 1 }
+  - expect-pin: { part-id: sevseg1, pin: E, value: 1 }
+  - expect-pin: { part-id: sevseg1, pin: F, value: 1 }
+  - expect-pin: { part-id: sevseg1, pin: G, value: 0 }

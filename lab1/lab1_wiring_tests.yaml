@@ -1,0 +1,294 @@
+name: Lab1 - Wiring Verification (diagram.json topology)
+version: 1
+author:
+
+# This scenario verifies that every connection in diagram.json is physically present
+# AND mapped exactly as specified, by reading BOTH ends of each wire with expect-pin.
+# It complements lab1_tests.yaml (which checks counting behaviour + the display end of
+# the segment wires); this file additionally proves the MCU end, the button wire, and
+# the ground connections.
+#
+# Pin-read names (discovered via the sim API) differ from diagram.json endpoint labels:
+#   diagram.json            expect-pin part:pin
+#   esp:2 .. esp:8          esp:2 .. esp:8        (MCU GPIO driving each segment)
+#   sevseg1:A .. :G         sevseg1:A .. :G       (display segment inputs)
+#   sevseg1:DP              sevseg1:DP            (decimal point -> GND)
+#   sevseg1:COM.1/.2        sevseg1:COM           (single common-cathode net -> GND)
+#   esp:9                   esp:9                 (MCU GPIO reading the button)
+#   btn1:1.l                btn1:1                (button signal side -> esp:9)
+#   btn1:2.l                btn1:2                (button GND side -> GND)
+#
+# Each segment wire is checked at all 10 digits 0-9. Every segment has a unique
+# on/off signature across those digits, so matching both ends at every digit proves
+# each GPIO is wired to its specific, correct segment (no swaps) and the wire is intact.
+# The display is common-cathode: a segment is HIGH (1) when lit. Values are numeric
+# (read as 1/0), so they are unquoted.
+
+steps:
+  # ==== Boot: display holds 0, button released ====
+  - wait-serial: "Current Value: 0"
+  # Ground wires (must read LOW): sevseg1:COM.1/.2 -> GND, sevseg1:DP -> GND, btn1:2.l -> GND
+  - expect-pin: { part-id: sevseg1, pin: "COM", value: 0 }
+  - expect-pin: { part-id: sevseg1, pin: "DP", value: 0 }
+  - expect-pin: { part-id: btn1, pin: "2", value: 0 }
+  # Button wire released: esp:9 (INPUT_PULLUP) and btn1:1 both idle HIGH  [esp:9 <-> btn1:1.l]
+  - expect-pin: { part-id: esp, pin: "9", value: 1 }
+  - expect-pin: { part-id: btn1, pin: "1", value: 1 }
+  # Segment wires at digit 0 -- both ends [esp:N <-> sevseg1:X]
+  - expect-pin: { part-id: esp, pin: "2", value: 1 }
+  - expect-pin: { part-id: sevseg1, pin: "A", value: 1 }
+  - expect-pin: { part-id: esp, pin: "3", value: 1 }
+  - expect-pin: { part-id: sevseg1, pin: "B", value: 1 }
+  - expect-pin: { part-id: esp, pin: "4", value: 1 }
+  - expect-pin: { part-id: sevseg1, pin: "C", value: 1 }
+  - expect-pin: { part-id: esp, pin: "5", value: 1 }
+  - expect-pin: { part-id: sevseg1, pin: "D", value: 1 }
+  - expect-pin: { part-id: esp, pin: "6", value: 1 }
+  - expect-pin: { part-id: sevseg1, pin: "E", value: 1 }
+  - expect-pin: { part-id: esp, pin: "7", value: 1 }
+  - expect-pin: { part-id: sevseg1, pin: "F", value: 1 }
+  - expect-pin: { part-id: esp, pin: "8", value: 0 }
+  - expect-pin: { part-id: sevseg1, pin: "G", value: 0 }
+  # ==== Press -> 1 ====
+  - set-control: { part-id: btn1, control: pressed, value: 1 }
+  - delay: 150ms
+  - wait-serial: "Current Value: 1"
+  # Button wire pressed end-to-end: button pulls esp:9 (and btn1:1) LOW  [esp:9 <-> btn1:1.l]
+  - expect-pin: { part-id: esp, pin: "9", value: 0 }
+  - expect-pin: { part-id: btn1, pin: "1", value: 0 }
+  # Segment wires at digit 1 -- both ends [esp:N <-> sevseg1:X]
+  - expect-pin: { part-id: esp, pin: "2", value: 0 }
+  - expect-pin: { part-id: sevseg1, pin: "A", value: 0 }
+  - expect-pin: { part-id: esp, pin: "3", value: 1 }
+  - expect-pin: { part-id: sevseg1, pin: "B", value: 1 }
+  - expect-pin: { part-id: esp, pin: "4", value: 1 }
+  - expect-pin: { part-id: sevseg1, pin: "C", value: 1 }
+  - expect-pin: { part-id: esp, pin: "5", value: 0 }
+  - expect-pin: { part-id: sevseg1, pin: "D", value: 0 }
+  - expect-pin: { part-id: esp, pin: "6", value: 0 }
+  - expect-pin: { part-id: sevseg1, pin: "E", value: 0 }
+  - expect-pin: { part-id: esp, pin: "7", value: 0 }
+  - expect-pin: { part-id: sevseg1, pin: "F", value: 0 }
+  - expect-pin: { part-id: esp, pin: "8", value: 0 }
+  - expect-pin: { part-id: sevseg1, pin: "G", value: 0 }
+  - set-control: { part-id: btn1, control: pressed, value: 0 }
+  - delay: 60ms
+  # Button wire released end-to-end: pull-up restores esp:9 (and btn1:1) HIGH
+  - expect-pin: { part-id: esp, pin: "9", value: 1 }
+  - expect-pin: { part-id: btn1, pin: "1", value: 1 }
+  # ==== Press -> 2 ====
+  - set-control: { part-id: btn1, control: pressed, value: 1 }
+  - delay: 150ms
+  - wait-serial: "Current Value: 2"
+  # Button wire pressed end-to-end: button pulls esp:9 (and btn1:1) LOW  [esp:9 <-> btn1:1.l]
+  - expect-pin: { part-id: esp, pin: "9", value: 0 }
+  - expect-pin: { part-id: btn1, pin: "1", value: 0 }
+  # Segment wires at digit 2 -- both ends [esp:N <-> sevseg1:X]
+  - expect-pin: { part-id: esp, pin: "2", value: 1 }
+  - expect-pin: { part-id: sevseg1, pin: "A", value: 1 }
+  - expect-pin: { part-id: esp, pin: "3", value: 1 }
+  - expect-pin: { part-id: sevseg1, pin: "B", value: 1 }
+  - expect-pin: { part-id: esp, pin: "4", value: 0 }
+  - expect-pin: { part-id: sevseg1, pin: "C", value: 0 }
+  - expect-pin: { part-id: esp, pin: "5", value: 1 }
+  - expect-pin: { part-id: sevseg1, pin: "D", value: 1 }
+  - expect-pin: { part-id: esp, pin: "6", value: 1 }
+  - expect-pin: { part-id: sevseg1, pin: "E", value: 1 }
+  - expect-pin: { part-id: esp, pin: "7", value: 0 }
+  - expect-pin: { part-id: sevseg1, pin: "F", value: 0 }
+  - expect-pin: { part-id: esp, pin: "8", value: 1 }
+  - expect-pin: { part-id: sevseg1, pin: "G", value: 1 }
+  - set-control: { part-id: btn1, control: pressed, value: 0 }
+  - delay: 60ms
+  # Button wire released end-to-end: pull-up restores esp:9 (and btn1:1) HIGH
+  - expect-pin: { part-id: esp, pin: "9", value: 1 }
+  - expect-pin: { part-id: btn1, pin: "1", value: 1 }
+  # ==== Press -> 3 ====
+  - set-control: { part-id: btn1, control: pressed, value: 1 }
+  - delay: 150ms
+  - wait-serial: "Current Value: 3"
+  # Button wire pressed end-to-end: button pulls esp:9 (and btn1:1) LOW  [esp:9 <-> btn1:1.l]
+  - expect-pin: { part-id: esp, pin: "9", value: 0 }
+  - expect-pin: { part-id: btn1, pin: "1", value: 0 }
+  # Segment wires at digit 3 -- both ends [esp:N <-> sevseg1:X]
+  - expect-pin: { part-id: esp, pin: "2", value: 1 }
+  - expect-pin: { part-id: sevseg1, pin: "A", value: 1 }
+  - expect-pin: { part-id: esp, pin: "3", value: 1 }
+  - expect-pin: { part-id: sevseg1, pin: "B", value: 1 }
+  - expect-pin: { part-id: esp, pin: "4", value: 1 }
+  - expect-pin: { part-id: sevseg1, pin: "C", value: 1 }
+  - expect-pin: { part-id: esp, pin: "5", value: 1 }
+  - expect-pin: { part-id: sevseg1, pin: "D", value: 1 }
+  - expect-pin: { part-id: esp, pin: "6", value: 0 }
+  - expect-pin: { part-id: sevseg1, pin: "E", value: 0 }
+  - expect-pin: { part-id: esp, pin: "7", value: 0 }
+  - expect-pin: { part-id: sevseg1, pin: "F", value: 0 }
+  - expect-pin: { part-id: esp, pin: "8", value: 1 }
+  - expect-pin: { part-id: sevseg1, pin: "G", value: 1 }
+  - set-control: { part-id: btn1, control: pressed, value: 0 }
+  - delay: 60ms
+  # Button wire released end-to-end: pull-up restores esp:9 (and btn1:1) HIGH
+  - expect-pin: { part-id: esp, pin: "9", value: 1 }
+  - expect-pin: { part-id: btn1, pin: "1", value: 1 }
+  # ==== Press -> 4 ====
+  - set-control: { part-id: btn1, control: pressed, value: 1 }
+  - delay: 150ms
+  - wait-serial: "Current Value: 4"
+  # Button wire pressed end-to-end: button pulls esp:9 (and btn1:1) LOW  [esp:9 <-> btn1:1.l]
+  - expect-pin: { part-id: esp, pin: "9", value: 0 }
+  - expect-pin: { part-id: btn1, pin: "1", value: 0 }
+  # Segment wires at digit 4 -- both ends [esp:N <-> sevseg1:X]
+  - expect-pin: { part-id: esp, pin: "2", value: 0 }
+  - expect-pin: { part-id: sevseg1, pin: "A", value: 0 }
+  - expect-pin: { part-id: esp, pin: "3", value: 1 }
+  - expect-pin: { part-id: sevseg1, pin: "B", value: 1 }
+  - expect-pin: { part-id: esp, pin: "4", value: 1 }
+  - expect-pin: { part-id: sevseg1, pin: "C", value: 1 }
+  - expect-pin: { part-id: esp, pin: "5", value: 0 }
+  - expect-pin: { part-id: sevseg1, pin: "D", value: 0 }
+  - expect-pin: { part-id: esp, pin: "6", value: 0 }
+  - expect-pin: { part-id: sevseg1, pin: "E", value: 0 }
+  - expect-pin: { part-id: esp, pin: "7", value: 1 }
+  - expect-pin: { part-id: sevseg1, pin: "F", value: 1 }
+  - expect-pin: { part-id: esp, pin: "8", value: 1 }
+  - expect-pin: { part-id: sevseg1, pin: "G", value: 1 }
+  - set-control: { part-id: btn1, control: pressed, value: 0 }
+  - delay: 60ms
+  # Button wire released end-to-end: pull-up restores esp:9 (and btn1:1) HIGH
+  - expect-pin: { part-id: esp, pin: "9", value: 1 }
+  - expect-pin: { part-id: btn1, pin: "1", value: 1 }
+  # ==== Press -> 5 ====
+  - set-control: { part-id: btn1, control: pressed, value: 1 }
+  - delay: 150ms
+  - wait-serial: "Current Value: 5"
+  # Button wire pressed end-to-end: button pulls esp:9 (and btn1:1) LOW  [esp:9 <-> btn1:1.l]
+  - expect-pin: { part-id: esp, pin: "9", value: 0 }
+  - expect-pin: { part-id: btn1, pin: "1", value: 0 }
+  # Segment wires at digit 5 -- both ends [esp:N <-> sevseg1:X]
+  - expect-pin: { part-id: esp, pin: "2", value: 1 }
+  - expect-pin: { part-id: sevseg1, pin: "A", value: 1 }
+  - expect-pin: { part-id: esp, pin: "3", value: 0 }
+  - expect-pin: { part-id: sevseg1, pin: "B", value: 0 }
+  - expect-pin: { part-id: esp, pin: "4", value: 1 }
+  - expect-pin: { part-id: sevseg1, pin: "C", value: 1 }
+  - expect-pin: { part-id: esp, pin: "5", value: 1 }
+  - expect-pin: { part-id: sevseg1, pin: "D", value: 1 }
+  - expect-pin: { part-id: esp, pin: "6", value: 0 }
+  - expect-pin: { part-id: sevseg1, pin: "E", value: 0 }
+  - expect-pin: { part-id: esp, pin: "7", value: 1 }
+  - expect-pin: { part-id: sevseg1, pin: "F", value: 1 }
+  - expect-pin: { part-id: esp, pin: "8", value: 1 }
+  - expect-pin: { part-id: sevseg1, pin: "G", value: 1 }
+  - set-control: { part-id: btn1, control: pressed, value: 0 }
+  - delay: 60ms
+  # Button wire released end-to-end: pull-up restores esp:9 (and btn1:1) HIGH
+  - expect-pin: { part-id: esp, pin: "9", value: 1 }
+  - expect-pin: { part-id: btn1, pin: "1", value: 1 }
+  # ==== Press -> 6 ====
+  - set-control: { part-id: btn1, control: pressed, value: 1 }
+  - delay: 150ms
+  - wait-serial: "Current Value: 6"
+  # Button wire pressed end-to-end: button pulls esp:9 (and btn1:1) LOW  [esp:9 <-> btn1:1.l]
+  - expect-pin: { part-id: esp, pin: "9", value: 0 }
+  - expect-pin: { part-id: btn1, pin: "1", value: 0 }
+  # Segment wires at digit 6 -- both ends [esp:N <-> sevseg1:X]
+  - expect-pin: { part-id: esp, pin: "2", value: 1 }
+  - expect-pin: { part-id: sevseg1, pin: "A", value: 1 }
+  - expect-pin: { part-id: esp, pin: "3", value: 0 }
+  - expect-pin: { part-id: sevseg1, pin: "B", value: 0 }
+  - expect-pin: { part-id: esp, pin: "4", value: 1 }
+  - expect-pin: { part-id: sevseg1, pin: "C", value: 1 }
+  - expect-pin: { part-id: esp, pin: "5", value: 1 }
+  - expect-pin: { part-id: sevseg1, pin: "D", value: 1 }
+  - expect-pin: { part-id: esp, pin: "6", value: 1 }
+  - expect-pin: { part-id: sevseg1, pin: "E", value: 1 }
+  - expect-pin: { part-id: esp, pin: "7", value: 1 }
+  - expect-pin: { part-id: sevseg1, pin: "F", value: 1 }
+  - expect-pin: { part-id: esp, pin: "8", value: 1 }
+  - expect-pin: { part-id: sevseg1, pin: "G", value: 1 }
+  - set-control: { part-id: btn1, control: pressed, value: 0 }
+  - delay: 60ms
+  # Button wire released end-to-end: pull-up restores esp:9 (and btn1:1) HIGH
+  - expect-pin: { part-id: esp, pin: "9", value: 1 }
+  - expect-pin: { part-id: btn1, pin: "1", value: 1 }
+  # ==== Press -> 7 ====
+  - set-control: { part-id: btn1, control: pressed, value: 1 }
+  - delay: 150ms
+  - wait-serial: "Current Value: 7"
+  # Button wire pressed end-to-end: button pulls esp:9 (and btn1:1) LOW  [esp:9 <-> btn1:1.l]
+  - expect-pin: { part-id: esp, pin: "9", value: 0 }
+  - expect-pin: { part-id: btn1, pin: "1", value: 0 }
+  # Segment wires at digit 7 -- both ends [esp:N <-> sevseg1:X]
+  - expect-pin: { part-id: esp, pin: "2", value: 1 }
+  - expect-pin: { part-id: sevseg1, pin: "A", value: 1 }
+  - expect-pin: { part-id: esp, pin: "3", value: 1 }
+  - expect-pin: { part-id: sevseg1, pin: "B", value: 1 }
+  - expect-pin: { part-id: esp, pin: "4", value: 1 }
+  - expect-pin: { part-id: sevseg1, pin: "C", value: 1 }
+  - expect-pin: { part-id: esp, pin: "5", value: 0 }
+  - expect-pin: { part-id: sevseg1, pin: "D", value: 0 }
+  - expect-pin: { part-id: esp, pin: "6", value: 0 }
+  - expect-pin: { part-id: sevseg1, pin: "E", value: 0 }
+  - expect-pin: { part-id: esp, pin: "7", value: 0 }
+  - expect-pin: { part-id: sevseg1, pin: "F", value: 0 }
+  - expect-pin: { part-id: esp, pin: "8", value: 0 }
+  - expect-pin: { part-id: sevseg1, pin: "G", value: 0 }
+  - set-control: { part-id: btn1, control: pressed, value: 0 }
+  - delay: 60ms
+  # Button wire released end-to-end: pull-up restores esp:9 (and btn1:1) HIGH
+  - expect-pin: { part-id: esp, pin: "9", value: 1 }
+  - expect-pin: { part-id: btn1, pin: "1", value: 1 }
+  # ==== Press -> 8 ====
+  - set-control: { part-id: btn1, control: pressed, value: 1 }
+  - delay: 150ms
+  - wait-serial: "Current Value: 8"
+  # Button wire pressed end-to-end: button pulls esp:9 (and btn1:1) LOW  [esp:9 <-> btn1:1.l]
+  - expect-pin: { part-id: esp, pin: "9", value: 0 }
+  - expect-pin: { part-id: btn1, pin: "1", value: 0 }
+  # Segment wires at digit 8 -- both ends [esp:N <-> sevseg1:X]
+  - expect-pin: { part-id: esp, pin: "2", value: 1 }
+  - expect-pin: { part-id: sevseg1, pin: "A", value: 1 }
+  - expect-pin: { part-id: esp, pin: "3", value: 1 }
+  - expect-pin: { part-id: sevseg1, pin: "B", value: 1 }
+  - expect-pin: { part-id: esp, pin: "4", value: 1 }
+  - expect-pin: { part-id: sevseg1, pin: "C", value: 1 }
+  - expect-pin: { part-id: esp, pin: "5", value: 1 }
+  - expect-pin: { part-id: sevseg1, pin: "D", value: 1 }
+  - expect-pin: { part-id: esp, pin: "6", value: 1 }
+  - expect-pin: { part-id: sevseg1, pin: "E", value: 1 }
+  - expect-pin: { part-id: esp, pin: "7", value: 1 }
+  - expect-pin: { part-id: sevseg1, pin: "F", value: 1 }
+  - expect-pin: { part-id: esp, pin: "8", value: 1 }
+  - expect-pin: { part-id: sevseg1, pin: "G", value: 1 }
+  - set-control: { part-id: btn1, control: pressed, value: 0 }
+  - delay: 60ms
+  # Button wire released end-to-end: pull-up restores esp:9 (and btn1:1) HIGH
+  - expect-pin: { part-id: esp, pin: "9", value: 1 }
+  - expect-pin: { part-id: btn1, pin: "1", value: 1 }
+  # ==== Press -> 9 ====
+  - set-control: { part-id: btn1, control: pressed, value: 1 }
+  - delay: 150ms
+  - wait-serial: "Current Value: 9"
+  # Button wire pressed end-to-end: button pulls esp:9 (and btn1:1) LOW  [esp:9 <-> btn1:1.l]
+  - expect-pin: { part-id: esp, pin: "9", value: 0 }
+  - expect-pin: { part-id: btn1, pin: "1", value: 0 }
+  # Segment wires at digit 9 -- both ends [esp:N <-> sevseg1:X]
+  - expect-pin: { part-id: esp, pin: "2", value: 1 }
+  - expect-pin: { part-id: sevseg1, pin: "A", value: 1 }
+  - expect-pin: { part-id: esp, pin: "3", value: 1 }
+  - expect-pin: { part-id: sevseg1, pin: "B", value: 1 }
+  - expect-pin: { part-id: esp, pin: "4", value: 1 }
+  - expect-pin: { part-id: sevseg1, pin: "C", value: 1 }
+  - expect-pin: { part-id: esp, pin: "5", value: 1 }
+  - expect-pin: { part-id: sevseg1, pin: "D", value: 1 }
+  - expect-pin: { part-id: esp, pin: "6", value: 0 }
+  - expect-pin: { part-id: sevseg1, pin: "E", value: 0 }
+  - expect-pin: { part-id: esp, pin: "7", value: 1 }
+  - expect-pin: { part-id: sevseg1, pin: "F", value: 1 }
+  - expect-pin: { part-id: esp, pin: "8", value: 1 }
+  - expect-pin: { part-id: sevseg1, pin: "G", value: 1 }
+  - set-control: { part-id: btn1, control: pressed, value: 0 }
+  - delay: 60ms
+  # Button wire released end-to-end: pull-up restores esp:9 (and btn1:1) HIGH
+  - expect-pin: { part-id: esp, pin: "9", value: 1 }
+  - expect-pin: { part-id: btn1, pin: "1", value: 1 }
