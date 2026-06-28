@@ -73,8 +73,8 @@ To get Wokwi access in VSCode, you need to add a Wokwi license. Find the Wokwi S
 - To open it as a Wokwi simulator, select "Wokwi Diagram Editor".
 - The Wokwi simulator requires the Wokwi license — see the VSCode Wokwi section for more information.
 
-## Running the Unit Tests
-- Note: the unit tests are there to help you answer the quiz questions. They don't need to pass in order for the assignment to be graded as complete.
+## Optional: Running the Unit Tests
+- **Note**: The unit tests exists to help you answer the quiz questions. They don't need to pass in order for the assignment to be graded as complete since lab completion depends on the quiz.
 - This requires the Wokwi CLI to be set up. For more information, see the VSCode Wokwi section.
 
 9. In the Codespace's VSCode terminal:
@@ -86,3 +86,8 @@ To get Wokwi access in VSCode, you need to add a Wokwi license. Find the Wokwi S
 
 10. The unit tests pass when you see something similar to below.
 ![VSCode Wokwi Image 15](assets/image/markdown/labsetupimages/wokwivscode_15.png)
+
+#### Wokwi's Usage Limit
+- Wokwi has usage limits when running unit tests
+- Wokwi offers 50 minutes of simulation time per month. 
+- Each lab unit test run is estimated to take around 30-60 seconds.
