@@ -73,6 +73,8 @@ The pushbutton was connected to: GPIO7 → button → GND
 
 Once your circuit on wokwi.com matches the diagram above, switch to the **diagram.json** tab in the Wokwi web editor, select all of its text, and copy it. Then open `lab2/diagram.json` in your Codespace (it starts almost empty, containing only the bare ESP32-C3 board) and paste your circuit in, replacing the existing contents. This is the circuit that the Wokwi simulator and the unit tests (`make test-all`) will use, so the simulation will not work until you do this.
 
+Note: For the tests, you may need to replace the word "btn" in lab2_tests.yaml for the word "btn1" if wokwi uses the component name "btn1" instead of "btn".
+
 **Step 3: Software Design**
 
 The system was implemented using a software state machine with the following states:
@@ -363,3 +365,5 @@ void loop() {
 | `case ST_LOSE:` blank | A) `ledsAllOn();` · B) `showIdlePattern();` · C) `ledShowIndex(pos);` | Keeps the LED on where the player lost. |
 | `buttonWasPressed()` in lose | A) `showIdlePattern();` · B) `resetGame();` · C) `ledsAllOff();` | Button restarts the game after losing. |
 | `default:` blank | A) `ledsAllOn();` · B) `showIdlePattern();` · C) `resetGame();` | Safety reset if something goes wrong. |
+
+## Unit Tests:
